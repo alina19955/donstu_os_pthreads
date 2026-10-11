@@ -13,15 +13,17 @@
 #include <pthread.h>
 
 #define COUNT_THREADS 4
-#define COUNT_ITERATIONS 3
+#define COUNT_ITERATIONS 10000
 
 struct ThreadArgs {
     int id;
     char tag[10];
+    char message[64];
 };
 
-extern int g_fd;
-extern pthread_mutex_t g_lock;
+extern int g_fd;//объявление 
+extern pthread_mutex_t g_lock;//объявление
+extern int counter;//объявление
 
 pid_t getThreadID(void);
 
@@ -29,6 +31,8 @@ pid_t getThreadID(void);
 int write_line(const char *msg);
 
 void *func_thread(void *arg);
+void *producer(void *arg);
+void *consumer(void *arg);
 void about(void);
 
 #endif

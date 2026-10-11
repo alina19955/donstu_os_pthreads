@@ -2,3 +2,4 @@ app
 *.o
 output.log
 trace.log
+pthread_equal_demo
