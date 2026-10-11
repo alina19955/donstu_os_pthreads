@@ -1,41 +1,39 @@
 #include "pthreadfuncs.h"
 
-// common resources - is a file for logging
 int g_fd = -1;
 pthread_mutex_t g_lock = PTHREAD_MUTEX_INITIALIZER;
 
-// git ID of current thread
 pid_t getThreadID(void) {
     return (pid_t) syscall(SYS_gettid);
 }
 
-// write a string from thread with mutex
-void write_line(const char *msg) {
+int write_line(const char *msg) {
     pthread_mutex_lock(&g_lock);
     ssize_t n = write(g_fd, msg, strlen(msg));
+    int res = 0;
     if (n < 0) {
-        // return error
         fprintf(stderr, "write() failed: %s, [file descr = %d]\n", strerror(errno), g_fd);
+        res = -1;
     }
     pthread_mutex_unlock(&g_lock);
+    return res;
 }
 
-// function for thread
-void *func_thread(void *arg){
-struct ThreadArgs *t = (struct ThreadArgs *)arg;
+void *func_thread(void *arg) {
+    struct ThreadArgs *t = (struct ThreadArgs *)arg;
     char buf[128];
-    // write something in opened file
+    struct timespec ts = {0, 100 * 1000 * 1000};
+
     for (int i = 0; i < COUNT_ITERATIONS; ++i) {
-        // here we write process id, parent process id, thread id, and name of thread with iteration
         snprintf(buf, sizeof(buf),
-                 "[tag = %s] pid = %d ppid = %d tid = %d iter = %d\n", t->tag, getpid(), getppid(), getThreadID(), i);
+                 "[tag = %s] pid = %d ppid = %d tid = %d iter = %d\n",
+                 t->tag, getpid(), getppid(), getThreadID(), i);
         write_line(buf);
-        // imitation of something
-        usleep(100 * 1000); /* 100 мс */
+        nanosleep(&ts, NULL);
     }
     return NULL;
 }
 
-void about()  {
+void about(void) {
     printf("Pthread example\n");
 }
